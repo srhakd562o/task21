@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .delete-icon {
+            cursor: pointer;
+            color: red;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <form onsubmit="saveToCrud(event)">
+        <label>Name</label>
+        <input id='username' type="text" name="username" required/>
+        <label>EmailId</label>
+        <input id='email' type="text" name="emailId" required/>
+        <label>Phone number</label>
+        <input id='phonenumber' type="tel" name="phonenumber"/>
+        <button>Submit</button>
+    </form>
+    <ul id='listOfUser'></ul>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script>
+        function saveToCrud(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const phonenumber = document.getElementById('phonenumber').value;
+            const obj = {
+                username,
+                email,
+                phonenumber
+            };
+
+            // Send POST request to crudcrud.com
+            axios.post('https://crudcrud.com/api/9132efe99daf4c4ab7bfcf8b9b28631c/appointmentData', obj)
+                .then(response => {
+                    console.log('Object saved in the cloud:', response.data);
+                    showNewUserOnScreen(response.data); // Display locally
+                })
+                .catch(error => {
+                    console.error('Error saving object:', error);
+                    // Optionally, you can handle errors here
+                });
+        }
+
+        function fetchAndDisplayUserDetails() {
+            // Fetch user details from CRUD CRUD API
+            axios.get('https://crudcrud.com/api/9132efe99daf4c4ab7bfcf8b9b28631c/appointmentData')
+                .then(response => {
+                    const userData = response.data;
+                    userData.forEach(user => {
+                        showNewUserOnScreen(user);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching user details:', error);
+                    // Optionally, you can handle errors here
+                });
+        }
+
+        window.addEventListener("DOMContentLoaded", fetchAndDisplayUserDetails);
+
+        function showNewUserOnScreen(obj){
+            document.getElementById('email').value = '';
+            document.getElementById('username').value = '';
+            document.getElementById('phonenumber').value = '';
+
+            const parent = document.getElementById('listOfUser');
+            const child1 = document.createElement('li');
+            child1.textContent = obj.username + '-' + obj.email + '-' + obj.phonenumber;
+
+            const deleteBtn = document.createElement('span');
+            deleteBtn.textContent = ' ❌';
+            deleteBtn.className = 'delete-icon';
+            deleteBtn.addEventListener('click', function() {
+                deleteUser(obj._id, child1);
+            });
+
+            child1.appendChild(deleteBtn);
+            parent.appendChild(child1);
+        }
+
+        function deleteUser(userId, listItem) {
+            axios.delete(`https://crudcrud.com/api/9132efe99daf4c4ab7bfcf8b9b28631c/appointmentData/${userId}`)
+                .then(response => {
+                    console.log('User detail deleted:', response.data);
+                    // Remove user detail from the website
+                    listItem.remove();
+                })
+                .catch(error => {
+                    console.error('Error deleting user detail:', error);
+                    // Optionally, you can handle errors here
+                });
+        }
+    </script>
+</body>
+</html>
